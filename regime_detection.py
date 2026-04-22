@@ -8,6 +8,7 @@ import numpy as np
 from enum import Enum
 from typing import Dict, List, Optional
 from dataclasses import dataclass
+from analysis_tracker import get_tracker
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -143,6 +144,19 @@ class RegimeDetector:
         )
         
         logger.info(f"Regime detected: {regime.value} (confidence: {confidence:.2f})")
+        tracker = get_tracker()
+        actions = self.get_regime_action(regime)
+        tracker.add_regime_detection_step(
+            regime=regime.value,
+            confidence=confidence,
+            detection_metrics={
+                'hurst_exponent': hurst_exponent,
+                'volatility': volatility,
+                'volume_zscore': volume_zscore
+            },
+            decision_logic=f"H={hurst_exponent:.3f} Vol={volatility:.4f}",
+            regime_features=actions
+        )
         return result
     
     def get_regime_action(self, regime: MarketRegime) -> Dict[str, any]:

@@ -8,6 +8,7 @@ import numpy as np
 from scipy import stats
 from statsmodels.tsa.stattools import adfuller
 from typing import Dict, Tuple, Optional
+from analysis_tracker import get_tracker
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -265,6 +266,11 @@ class FeatureEngineer:
         features = features.fillna(0)
         
         logger.info(f"Created {len(features.columns)} features")
+        tracker = get_tracker()
+        tracker.add_feature_engineering_step(
+            features_calculated={'returns': 'Price change %', 'log_returns': 'Log returns', 'rolling_mean': 'Avg', 'rolling_std': 'Std Dev', 'volatility': 'Vol', 'volume_zscore': 'Vol anomaly', 'atr': 'ATR'},
+            feature_values={'latest_volatility': float(features['volatility'].iloc[-1]) if 'volatility' in features.columns else 0, 'latest_volume_zscore': float(features['volume_zscore'].iloc[-1]) if 'volume_zscore' in features.columns else 0}
+        )
         return features
 
 # Example usage

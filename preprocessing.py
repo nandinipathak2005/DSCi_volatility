@@ -10,6 +10,7 @@ import logging
 from typing import List, Dict, Optional, Tuple, Any
 
 import feature_engineering
+from analysis_tracker import get_tracker
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -181,6 +182,15 @@ class DataPreprocessor:
         processed = self.apply_ema_smoothing(processed)
         
         logger.info("Preprocessing complete!")
+        
+        # Log to analysis tracker
+        tracker = get_tracker()
+        tracker.add_data_processing_step(
+            processed_rows=len(processed),
+            removed_outliers=len(data) - len(processed),
+            missing_values_filled=0,
+            processing_methods=['Outlier removal (3-sigma)', 'Missing value imputation', 'EMA smoothing', 'Timestamp alignment']
+        )
         return processed
     
     def calculate_returns(self, data: pd.DataFrame, column: str = 'close') -> pd.DataFrame:
